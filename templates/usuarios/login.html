@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión | InvManager</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+<body style="background: linear-gradient(135deg, #1e2a3a 0%, #0d6efd 100%); min-height: 100vh;"
+      class="d-flex align-items-center justify-content-center">
+
+  <div class="col-10 col-sm-8 col-md-5 col-lg-4">
+    <div class="card border-0 shadow-lg rounded-4">
+      <div class="card-body p-4 p-md-5">
+
+        <!-- Brand -->
+        <div class="text-center mb-4">
+          <div class="mb-2">
+            <i class="bi bi-box-seam text-primary" style="font-size: 3rem;"></i>
+          </div>
+          <h4 class="fw-bold mb-0">InvManager</h4>
+          <p class="text-muted small mt-1">Sistema de Gestión de Inventario</p>
+        </div>
+
+        <!-- Mensajes -->
+        {% if messages %}
+        {% for msg in messages %}
+        <div class="alert alert-{{ msg.tags }} border-0 py-2 small">
+          {{ msg }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Formulario -->
+        <form method="post" novalidate>
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-uppercase text-muted">Usuario</label>
+            {{ form.username }}
+            {% for e in form.username.errors %}
+            <div class="text-danger small mt-1">{{ e }}</div>
+            {% endfor %}
+          </div>
+          <div class="mb-4">
+            <label class="form-label fw-semibold small text-uppercase text-muted">Contraseña</label>
+            {{ form.password }}
+            {% for e in form.password.errors %}
+            <div class="text-danger small mt-1">{{ e }}</div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold rounded-3">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+          </button>
+        </form>
+
+      </div>
+    </div>
+    <p class="text-center text-white-50 small mt-3">
+      Universidad Panamericana &middot; Sistemas OSS &middot; 2025
+    </p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

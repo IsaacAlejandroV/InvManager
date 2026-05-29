@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'movimientos:lista' %}">Movimientos</a></li>
+<li class="breadcrumb-item active">{{ titulo }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header border-0 py-3 bg-{{ color }} bg-opacity-10">
+        <h6 class="mb-0 fw-semibold text-{{ color }}">
+          {% if color == 'success' %}<i class="bi bi-arrow-down-circle me-2"></i>{% endif %}
+          {% if color == 'danger' %}<i class="bi bi-arrow-up-circle me-2"></i>{% endif %}
+          {% if color == 'warning' %}<i class="bi bi-arrow-left-right me-2"></i>{% endif %}
+          {{ titulo }}
+        </h6>
+      </div>
+      <div class="card-body p-4">
+        <form method="post" novalidate>
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Producto *</label>
+            {{ form.producto }}
+            {% for e in form.producto.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            <div id="stock-info" class="form-text text-muted d-none">
+              <i class="bi bi-info-circle me-1"></i>
+              Stock actual: <strong id="stock-valor">—</strong>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Tipo de movimiento *</label>
+            {{ form.tipo }}
+            {% for e in form.tipo.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Cantidad *</label>
+            {{ form.cantidad }}
+            {% for e in form.cantidad.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Precio Unitario ($)</label>
+            {{ form.precio_unitario }}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold small">Notas</label>
+            {{ form.notas }}
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-{{ color }} px-4">
+              <i class="bi bi-check-lg me-1"></i>Registrar Movimiento
+            </button>
+            <a href="{% url 'movimientos:lista' %}" class="btn btn-outline-secondary px-4">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Muestra el stock actual al seleccionar producto
+  const productos = {
+    {% for p in form.producto.field.queryset %}
+    "{{ p.id }}": { nombre: "{{ p.nombre|escapejs }}", stock: {{ p.stock_actual }}, unidad: "{{ p.get_unidad_medida_display }}" },
+    {% endfor %}
+  };
+
+  document.getElementById("{{ form.producto.id_for_label }}").addEventListener("change", function () {
+    const sel = productos[this.value];
+    const info = document.getElementById("stock-info");
+    if (sel) {
+      document.getElementById("stock-valor").textContent = sel.stock + " " + sel.unidad;
+      info.classList.remove("d-none");
+    } else {
+      info.classList.add("d-none");
+    }
+  });
+</script>
+{% endblock %}

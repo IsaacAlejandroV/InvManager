@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}InvManager{% endblock %} | Sistema de Inventario</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="{% static 'css/custom.css' %}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-light">
+
+{% if user.is_authenticated %}
+<div class="d-flex">
+
+  <!-- ── Sidebar ──────────────────────────────────────────────────── -->
+  <nav id="sidebar" class="sidebar bg-sidebar d-flex flex-column"
+       style="min-width:240px;max-width:240px;min-height:100vh;position:fixed;z-index:100;">
+
+    <!-- Brand -->
+    <div class="p-3 border-bottom border-secondary text-center">
+      <a href="{% url 'dashboard' %}" class="text-white text-decoration-none">
+        <i class="bi bi-box-seam fs-4 text-primary me-1"></i>
+        <span class="fw-bold fs-5">InvManager</span>
+      </a>
+    </div>
+
+    <!-- Nav links -->
+    <div class="flex-grow-1 overflow-auto py-2">
+
+      <a href="{% url 'dashboard' %}"
+         class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2 me-2"></i>Dashboard
+      </a>
+
+      <div class="sidebar-heading">Inventario</div>
+
+      <a href="{% url 'productos:lista' %}"
+         class="sidebar-link {% if 'productos' in request.resolver_match.namespaces and request.resolver_match.url_name == 'lista' %}active{% endif %}">
+        <i class="bi bi-box me-2"></i>Productos
+      </a>
+      <a href="{% url 'productos:categorias_lista' %}" class="sidebar-link sidebar-sub">
+        <i class="bi bi-tags me-2"></i>Categorías
+      </a>
+      <a href="{% url 'productos:proveedores_lista' %}" class="sidebar-link sidebar-sub">
+        <i class="bi bi-truck me-2"></i>Proveedores
+      </a>
+
+      <div class="sidebar-heading">Movimientos</div>
+
+      <a href="{% url 'movimientos:lista' %}" class="sidebar-link">
+        <i class="bi bi-clock-history me-2"></i>Historial
+      </a>
+      <a href="{% url 'movimientos:crear' %}?tipo=entrada" class="sidebar-link">
+        <i class="bi bi-arrow-down-circle text-success me-2"></i>Registrar Entrada
+      </a>
+      <a href="{% url 'movimientos:crear' %}?tipo=salida" class="sidebar-link">
+        <i class="bi bi-arrow-up-circle text-danger me-2"></i>Registrar Salida
+      </a>
+      <a href="{% url 'movimientos:alertas' %}" class="sidebar-link">
+        <i class="bi bi-exclamation-triangle text-warning me-2"></i>Alertas de Stock
+        {% if alertas_count %}
+        <span class="badge bg-danger rounded-pill ms-auto">{{ alertas_count }}</span>
+        {% endif %}
+      </a>
+
+      {% if request.user.rol == 'admin' %}
+      <div class="sidebar-heading">Administración</div>
+      <a href="{% url 'usuarios:lista' %}" class="sidebar-link">
+        <i class="bi bi-people me-2"></i>Usuarios
+      </a>
+      {% endif %}
+    </div>
+
+    <!-- User footer -->
+    <div class="border-top border-secondary p-3">
+      <div class="d-flex align-items-center gap-2">
+        <div class="avatar-circle bg-primary">
+          {{ request.user.username|first|upper }}
+        </div>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="text-white small fw-semibold text-truncate">
+            {{ request.user.get_full_name|default:request.user.username }}
+          </div>
+          <div class="text-muted" style="font-size:.7rem">
+            {{ request.user.get_rol_display }}
+          </div>
+        </div>
+        <a href="{% url 'usuarios:logout' %}" class="text-white-50" title="Cerrar sesión">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Main content ──────────────────────────────────────────────── -->
+  <div class="main-content flex-grow-1" style="margin-left:240px;min-height:100vh;">
+
+    <!-- Top bar -->
+    <header class="bg-white border-bottom shadow-sm py-2 px-4 d-flex align-items-center justify-content-between sticky-top">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0 small">
+            {% block breadcrumb %}
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+            {% endblock %}
+          </ol>
+        </nav>
+        <h5 class="mb-0 fw-bold">{% block page_title %}{% endblock %}</h5>
+      </div>
+      <div>{% block header_actions %}{% endblock %}</div>
+    </header>
+
+    <!-- Flash messages -->
+    {% if messages %}
+    <div class="px-4 pt-3">
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }} alert-dismissible fade show border-0 shadow-sm" role="alert">
+        {% if msg.tags == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>{% endif %}
+        {% if msg.tags == 'error' or msg.tags == 'danger' %}<i class="bi bi-x-circle-fill me-2"></i>{% endif %}
+        {% if msg.tags == 'warning' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>{% endif %}
+        {% if msg.tags == 'info' %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Page content -->
+    <div class="p-4">{% block content %}{% endblock %}</div>
+  </div>
+
+</div><!-- end d-flex -->
+
+{% else %}
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

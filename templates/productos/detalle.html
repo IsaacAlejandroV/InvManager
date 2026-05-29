@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}{{ producto.nombre }}{% endblock %}
+{% block page_title %}{{ producto.nombre }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'productos:lista' %}">Productos</a></li>
+<li class="breadcrumb-item active">{{ producto.nombre|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+  <a href="{% url 'movimientos:crear' %}?tipo=entrada" class="btn btn-success btn-sm">
+    <i class="bi bi-arrow-down-circle me-1"></i>Entrada
+  </a>
+  <a href="{% url 'movimientos:crear' %}?tipo=salida" class="btn btn-danger btn-sm">
+    <i class="bi bi-arrow-up-circle me-1"></i>Salida
+  </a>
+  <a href="{% url 'productos:editar' producto.pk %}" class="btn btn-outline-primary btn-sm">
+    <i class="bi bi-pencil me-1"></i>Editar
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+  <!-- Info del producto -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      {% if producto.imagen %}
+      <img src="{{ producto.imagen.url }}" class="card-img-top rounded-top-3" style="max-height:220px;object-fit:cover;">
+      {% else %}
+      <div class="bg-light d-flex align-items-center justify-content-center rounded-top-3" style="height:160px;">
+        <i class="bi bi-box text-muted" style="font-size:3rem;"></i>
+      </div>
+      {% endif %}
+      <div class="card-body">
+        <h5 class="fw-bold mb-1">{{ producto.nombre }}</h5>
+        <code class="text-muted small">{{ producto.codigo }}</code>
+
+        {% if producto.descripcion %}
+        <p class="text-muted small mt-2 mb-3">{{ producto.descripcion }}</p>
+        {% endif %}
+
+        <table class="table table-sm table-borderless mb-0">
+          <tr>
+            <td class="text-muted small ps-0">Categoría</td>
+            <td class="fw-semibold small">{{ producto.categoria.nombre|default:"—" }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small ps-0">Proveedor</td>
+            <td class="fw-semibold small">{{ producto.proveedor.nombre|default:"—" }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small ps-0">Unidad</td>
+            <td class="fw-semibold small">{{ producto.get_unidad_medida_display }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small ps-0">P. Compra</td>
+            <td class="fw-semibold small">${{ producto.precio_compra }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small ps-0">P. Venta</td>
+            <td class="fw-semibold small">${{ producto.precio_venta }}</td>
+          </tr>
+          <tr>
+            <td class="text-muted small ps-0">Creado</td>
+            <td class="small text-muted">{{ producto.creado_en|date:"d/m/Y" }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock y movimientos -->
+  <div class="col-lg-8">
+
+    <!-- Stock actual -->
+    <div class="row g-3 mb-4">
+      <div class="col-sm-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body py-3">
+            <div class="text-muted small mb-1">Stock Actual</div>
+            <div class="fs-2 fw-bold {% if producto.stock_bajo %}text-danger{% else %}text-success{% endif %}">
+              {{ producto.stock_actual }}
+            </div>
+            <div class="text-muted small">{{ producto.get_unidad_medida_display }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body py-3">
+            <div class="text-muted small mb-1">Stock Mínimo</div>
+            <div class="fs-2 fw-bold text-warning">{{ producto.stock_minimo }}</div>
+            <div class="text-muted small">{{ producto.get_unidad_medida_display }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-4">
+        <div class="card border-0 shadow-sm text-center h-100">
+          <div class="card-body py-3">
+            <div class="text-muted small mb-1">Valor Total</div>
+            <div class="fs-4 fw-bold text-primary">${{ producto.valor_total|floatformat:2|intcomma }}</div>
+            <div class="text-muted small">en inventario</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Historial de movimientos -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-clock-history me-2 text-primary"></i>Historial de Movimientos
+        </h6>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Tipo</th>
+              <th class="text-center">Cantidad</th>
+              <th>Stock</th>
+              <th>Notas</th>
+              <th>Usuario</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in movimientos %}
+            <tr>
+              <td>
+                {% if m.tipo == 'entrada' %}
+                  <span class="badge rounded-pill bg-success">↓ Entrada</span>
+                {% elif m.tipo == 'salida' %}
+                  <span class="badge rounded-pill bg-danger">↑ Salida</span>
+                {% else %}
+                  <span class="badge rounded-pill bg-warning text-dark">⟳ Ajuste</span>
+                {% endif %}
+              </td>
+              <td class="text-center fw-semibold">{{ m.cantidad }}</td>
+              <td><small class="text-muted">{{ m.stock_anterior }} → <strong>{{ m.stock_posterior }}</strong></small></td>
+              <td><small class="text-muted">{{ m.notas|truncatechars:40|default:"—" }}</small></td>
+              <td><small>{{ m.usuario.username|default:"—" }}</small></td>
+              <td><small class="text-muted">{{ m.fecha|date:"d/m/Y H:i" }}</small></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-4">Sin movimientos registrados.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

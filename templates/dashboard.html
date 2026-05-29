@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Inicio</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Stat cards -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+          <i class="bi bi-box-seam fs-4"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Total Productos</div>
+          <div class="fs-2 fw-bold lh-1">{{ total_productos }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+          <i class="bi bi-exclamation-triangle fs-4"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Stock Bajo</div>
+          <div class="fs-2 fw-bold lh-1 {% if productos_stock_bajo > 0 %}text-warning{% endif %}">
+            {{ productos_stock_bajo }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-success bg-opacity-10 text-success">
+          <i class="bi bi-currency-dollar fs-4"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Valor del Inventario</div>
+          <div class="fs-4 fw-bold lh-1">${{ valor_inventario|floatformat:2|intcomma }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="stat-icon bg-info bg-opacity-10 text-info">
+          <i class="bi bi-arrow-left-right fs-4"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Movimientos Hoy</div>
+          <div class="fs-2 fw-bold lh-1">{{ movimientos_hoy }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- Movimientos recientes -->
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-clock-history me-2 text-primary"></i>Movimientos Recientes</h6>
+        <a href="{% url 'movimientos:lista' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Producto</th>
+              <th>Tipo</th>
+              <th>Cantidad</th>
+              <th>Stock</th>
+              <th>Por</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for m in movimientos_recientes %}
+            <tr>
+              <td>
+                <a href="{% url 'productos:detalle' m.producto.pk %}" class="text-decoration-none fw-semibold text-dark">
+                  {{ m.producto.nombre|truncatechars:28 }}
+                </a>
+                <div class="text-muted" style="font-size:.72rem">{{ m.producto.codigo }}</div>
+              </td>
+              <td>
+                {% if m.tipo == 'entrada' %}
+                  <span class="badge rounded-pill bg-success">↓ Entrada</span>
+                {% elif m.tipo == 'salida' %}
+                  <span class="badge rounded-pill bg-danger">↑ Salida</span>
+                {% else %}
+                  <span class="badge rounded-pill bg-warning text-dark">⟳ Ajuste</span>
+                {% endif %}
+              </td>
+              <td class="fw-semibold">{{ m.cantidad }}</td>
+              <td><small class="text-muted">{{ m.stock_anterior }} → <strong>{{ m.stock_posterior }}</strong></small></td>
+              <td><small>{{ m.usuario.username|default:"—" }}</small></td>
+              <td><small class="text-muted">{{ m.fecha|date:"d/m/y H:i" }}</small></td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                Sin movimientos registrados todavía.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alertas de stock bajo -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
+        <h6 class="mb-0 fw-semibold">
+          <i class="bi bi-exclamation-triangle text-warning me-2"></i>Alertas de Stock
+        </h6>
+        <a href="{% url 'movimientos:alertas' %}" class="btn btn-sm btn-outline-warning">Ver todas</a>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for p in productos_alerta %}
+        <a href="{% url 'productos:detalle' p.pk %}"
+           class="list-group-item list-group-item-action py-2 px-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-semibold small">{{ p.nombre|truncatechars:28 }}</div>
+              <div class="text-muted" style="font-size:.72rem">
+                {{ p.categoria.nombre|default:"Sin categoría" }}
+              </div>
+            </div>
+            <span class="badge rounded-pill {% if p.stock_actual == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+              {{ p.stock_actual }}/{{ p.stock_minimo }}
+            </span>
+          </div>
+        </a>
+        {% empty %}
+        <div class="list-group-item text-center py-5 text-muted">
+          <i class="bi bi-check-circle text-success fs-3 d-block mb-2"></i>
+          <small>Sin alertas de stock</small>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="card border-0 shadow-sm mt-4">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-lightning me-2 text-primary"></i>Acciones Rápidas</h6>
+      </div>
+      <div class="card-body d-grid gap-2">
+        <a href="{% url 'productos:crear' %}" class="btn btn-outline-primary btn-sm">
+          <i class="bi bi-plus-circle me-2"></i>Nuevo Producto
+        </a>
+        <a href="{% url 'movimientos:crear' %}?tipo=entrada" class="btn btn-outline-success btn-sm">
+          <i class="bi bi-arrow-down-circle me-2"></i>Registrar Entrada
+        </a>
+        <a href="{% url 'movimientos:crear' %}?tipo=salida" class="btn btn-outline-danger btn-sm">
+          <i class="bi bi-arrow-up-circle me-2"></i>Registrar Salida
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

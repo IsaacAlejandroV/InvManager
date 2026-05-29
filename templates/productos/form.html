@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'productos:lista' %}">Productos</a></li>
+<li class="breadcrumb-item active">{{ titulo }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white border-0 py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-box me-2 text-primary"></i>{{ titulo }}</h6>
+      </div>
+      <div class="card-body p-4">
+        <form method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+
+          <div class="row g-3">
+            <div class="col-sm-8">
+              <label class="form-label fw-semibold small">Nombre *</label>
+              {{ form.nombre }}
+              {% for e in form.nombre.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label fw-semibold small">Código *</label>
+              {{ form.codigo }}
+              {% for e in form.codigo.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Descripción</label>
+              {{ form.descripcion }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold small">Categoría</label>
+              {{ form.categoria }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold small">Proveedor</label>
+              {{ form.proveedor }}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold small">Precio de Compra ($) *</label>
+              {{ form.precio_compra }}
+              {% for e in form.precio_compra.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold small">Precio de Venta ($) *</label>
+              {{ form.precio_venta }}
+              {% for e in form.precio_venta.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label fw-semibold small">Stock Actual</label>
+              {{ form.stock_actual }}
+              {% for e in form.stock_actual.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label fw-semibold small">Stock Mínimo</label>
+              {{ form.stock_minimo }}
+              {% for e in form.stock_minimo.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label fw-semibold small">Unidad de Medida</label>
+              {{ form.unidad_medida }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold small">Imagen (opcional)</label>
+              {{ form.imagen }}
+              {% if form.instance.imagen %}
+              <div class="mt-2">
+                <img src="{{ form.instance.imagen.url }}" class="rounded" style="max-height:80px;">
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 pt-4">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-check-lg me-1"></i>{{ accion }}
+            </button>
+            <a href="{% url 'productos:lista' %}" class="btn btn-outline-secondary px-4">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
