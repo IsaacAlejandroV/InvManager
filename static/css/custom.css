@@ -1,0 +1,101 @@
+/* ── Variables ─────────────────────────────────────────── */
+:root {
+  --sidebar-bg: #1a2332;
+  --sidebar-hover: rgba(255,255,255,.07);
+  --sidebar-active: rgba(13,110,253,.25);
+}
+
+/* ── Sidebar ───────────────────────────────────────────── */
+.bg-sidebar { background-color: var(--sidebar-bg) !important; }
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: .45rem 1rem;
+  color: rgba(255,255,255,.75);
+  text-decoration: none;
+  font-size: .875rem;
+  transition: background .15s, color .15s;
+  border-radius: 6px;
+  margin: 1px 8px;
+}
+.sidebar-link:hover {
+  background: var(--sidebar-hover);
+  color: #fff;
+}
+.sidebar-link.active {
+  background: var(--sidebar-active);
+  color: #fff;
+  font-weight: 600;
+}
+.sidebar-sub {
+  padding-left: 2.4rem !important;
+  font-size: .8rem !important;
+  color: rgba(255,255,255,.5) !important;
+}
+.sidebar-sub:hover { color: rgba(255,255,255,.8) !important; }
+
+.sidebar-heading {
+  padding: .75rem 1rem .2rem;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+}
+
+/* ── Avatar ────────────────────────────────────────────── */
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: .85rem;
+}
+
+/* ── Stat icon ─────────────────────────────────────────── */
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Main content ──────────────────────────────────────── */
+.main-content {
+  background: #f0f2f5;
+}
+
+/* ── Cards ─────────────────────────────────────────────── */
+.card {
+  border-radius: 12px !important;
+}
+
+/* ── Tables ────────────────────────────────────────────── */
+.table thead th {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #6c757d;
+}
+
+/* ── Breadcrumb ────────────────────────────────────────── */
+.breadcrumb-item a {
+  color: #6c757d;
+  text-decoration: none;
+}
+.breadcrumb-item a:hover { color: #0d6efd; }
+
+/* ── Scrollbar (Webkit) ────────────────────────────────── */
+.overflow-auto::-webkit-scrollbar { width: 4px; }
+.overflow-auto::-webkit-scrollbar-track { background: transparent; }
+.overflow-auto::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 4px; }
